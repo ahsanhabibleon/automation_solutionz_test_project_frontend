@@ -1,0 +1,8 @@
+:root {
+  --primary-rgb: 24, 144, 255;
+  --dark-bg-rgb: 0, 0, 0;
+  --warning-rgb: 255, 112, 67;
+  --primary-color: rgba(var(--primary-rgb), 1);
+  --warning-color: rgba(var(--warning-rgb), 1);
+  --dark-bg-05: rgba(var(--dark-bg-rgb), 0.5);
+}
