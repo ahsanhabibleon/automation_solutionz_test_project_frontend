@@ -1,0 +1,21 @@
+.login_register_form {
+  flex: 0 0 100%;
+  margin: 0 auto;
+  background-color: #fff;
+  padding: 32px;
+  .login-form-button {
+    width: 100%;
+  }
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 30px;
+  }
+}
+.login_register_container {
+  padding: 6rem 2rem;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
