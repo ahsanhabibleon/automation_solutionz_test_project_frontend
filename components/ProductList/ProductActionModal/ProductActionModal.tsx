@@ -133,7 +133,6 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
     }
 
     const sendPostRequest = async () => {
-        console.log({ payload })
         if (payload?.id && payload?.data) {
             try {
                 await fetch(`/api/products/update/${payload?.id}`, {
@@ -176,7 +175,6 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
     };
 
     const handleSelectedProduct = (id: string) => {
-        console.log({ id })
         const selected_product = products?.find(prod => prod._id === id) || null
         setSelectedProduct(selected_product)
     }

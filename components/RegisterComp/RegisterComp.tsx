@@ -75,7 +75,6 @@ const Register = ({ redirectUrl, actionType }: { redirectUrl: string, actionType
     };
 
     const onFinish = (values: any) => {
-        console.log('Received values of form: ', values);
         sendPostRequest({
             name: values.name,
             email: values.email,

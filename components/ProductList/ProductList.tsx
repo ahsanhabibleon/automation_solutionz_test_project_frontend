@@ -71,7 +71,6 @@ const ProductList = () => {
     useEffect(() => {
         fetchData();
         const actionType = router?.query?.action_type || null;
-        console.log({ router, actionType })
         if (actionType) {
             setOpenActionModal({
                 open: true,

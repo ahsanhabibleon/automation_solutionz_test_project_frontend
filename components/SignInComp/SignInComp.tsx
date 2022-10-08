@@ -9,7 +9,6 @@ const SignInComp = ({ redirectUrl, actionType }: { redirectUrl: string, actionTy
     const router = useRouter();
 
     const onFinish = (values: any) => {
-        console.log('Received values of form: ', values);
         sendPostRequest(values);
     };
 
