@@ -79,8 +79,8 @@ const ProductList = () => {
         }
     }, [])
 
-    const handleProductActionCallback = () => {
-        fetchData().then(() => {
+    const handleProductActionCallback = async () => {
+        await fetchData().then(() => {
             setOpenActionModal({ open: false })
         }).finally(() => {
             notification.success({

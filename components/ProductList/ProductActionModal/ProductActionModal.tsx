@@ -118,9 +118,7 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
                 }
                 payload.bookingPeriod = {}
 
-
                 setConfirmationStage(true)
-
             }
 
             setPayload({
@@ -153,7 +151,9 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
                         })
                     })
                     .finally(() => {
-                        setConfirmationStage(false)
+                        setTimeout(() => {
+                            setConfirmationStage(false)
+                        }, 2000);
                     })
 
             } catch (error: any) {
