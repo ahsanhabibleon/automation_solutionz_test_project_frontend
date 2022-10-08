@@ -107,7 +107,7 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
 
                 const should_repair = values?.needing_repair || (UPDATED_DURABILITY < 1000)
 
-                payload.durability = UPDATED_DURABILITY
+                payload.durability = (UPDATED_DURABILITY > -1) ? UPDATED_DURABILITY : 0
                 payload.needing_repair = should_repair
 
                 payload.availability = should_repair ? false : true
@@ -192,11 +192,10 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
                 {confirmationStage ? <>
                     <div className={Styles.confirmation_msg}>
                         {modalType === 'book' ?
-                            `Your estimated price is $${paymentAmount}.
-                            Do you want to proceed?` :
-                            `Your total price is $${paymentAmount}.
-                            Do you want to proceed?`
+                            <div>Your estimated price is ${paymentAmount}.</div> :
+                            <div>Your total price is ${paymentAmount}.</div>
                         }
+                        <div>Do you want to proceed?</div>
                     </div>
                 </> : <>
                     <Form.Item name="product" label="Product" rules={[{ required: true }]}>

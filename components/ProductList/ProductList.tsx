@@ -6,6 +6,8 @@ import ProductActionModal from './ProductActionModal'
 import { tableSettings } from './data'
 import Styles from './ProductList.module.scss'
 import { ModalStateTypes, ProductDataTypes, ProductFetchingAction, ProductFetchingActionKind, ProductReducerProps } from './ProductList.types'
+import { useRouter } from 'next/router'
+import { getToken } from '../../utils/UserManager'
 const { Search } = Input;
 
 const reducer = (state: ProductReducerProps, action: ProductFetchingAction) => {
@@ -35,6 +37,7 @@ const reducer = (state: ProductReducerProps, action: ProductFetchingAction) => {
 }
 
 const ProductList = () => {
+    const router = useRouter();
     const [{ loading, error, products }, dispatch] = useReducer<(state: ProductReducerProps, action: ProductFetchingAction) => ProductReducerProps>(reducer, {
         loading: false,
         error: null,
@@ -66,7 +69,15 @@ const ProductList = () => {
     };
 
     useEffect(() => {
-        fetchData()
+        fetchData();
+        const actionType = router?.query?.action_type || null;
+        console.log({ router, actionType })
+        if (actionType) {
+            setOpenActionModal({
+                open: true,
+                type: actionType as string
+            })
+        }
     }, [])
 
     const handleProductActionCallback = () => {
@@ -80,7 +91,15 @@ const ProductList = () => {
     }
 
     const handleOpenActionModal = (val: { open: boolean, type: string }) => {
-        setOpenActionModal(val)
+        const token = getToken()
+        if (token) {
+            setOpenActionModal(val)
+        } else {
+            notification.warning({
+                message: 'Please sign in to continue.'
+            })
+            router.push(`/sign-in?action_type=${val?.type}`)
+        }
     }
 
     return (
@@ -105,7 +124,7 @@ const ProductList = () => {
                 </div>
             </section>
 
-            {openActionModal &&
+            {openActionModal?.open &&
                 <ProductActionModal
                     products={products}
                     openActionModal={openActionModal}

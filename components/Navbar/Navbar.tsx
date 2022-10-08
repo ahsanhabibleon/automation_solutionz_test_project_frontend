@@ -4,14 +4,14 @@ import Styles from "./Navbar.module.scss"
 import jwt_decode from "jwt-decode";
 import { Dropdown, Menu, notification, Space } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
+import { getToken, removeLoggedInUser } from '../../utils/UserManager';
 
 const Navbar = () => {
 
     const [user, setUser] = useState<any>(null);
 
     const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("store");
+        removeLoggedInUser()
         window.location.reload();
         notification.success({
             message: 'Successfully logged out!',
@@ -19,7 +19,7 @@ const Navbar = () => {
     }
 
     useEffect(() => {
-        const token = localStorage.getItem("token")
+        const token = getToken()
         if (token) {
             const decoded = jwt_decode(token)
             setUser(decoded)
@@ -29,13 +29,9 @@ const Navbar = () => {
     const menu = (
         <Menu
             items={[
-                // {
-                //     label: <Link href="/profile">Profile</Link>,
-                //     key: '0',
-                // },
                 {
                     label: 'Logout',
-                    key: '3',
+                    key: '0',
                     onClick: logout
                 },
             ]}

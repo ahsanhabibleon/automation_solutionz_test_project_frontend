@@ -2,8 +2,9 @@ import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Form, Input, notification } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { setCookieValue } from '../../utils/UserManager';
 
-const SignInComp = ({ redirectUrl }: { redirectUrl: string }) => {
+const SignInComp = ({ redirectUrl, actionType }: { redirectUrl: string, actionType: string }) => {
 
     const router = useRouter();
 
@@ -25,11 +26,11 @@ const SignInComp = ({ redirectUrl }: { redirectUrl: string }) => {
                 .then((res) => res.json())
                 .then((data) => {
                     if (data?.token) {
-                        localStorage.setItem('token', data?.token || '');
+                        setCookieValue('token', data?.token || '')
                         notification.success({
                             message: 'Successfully signed in!',
                         })
-                        router.push('/' + redirectUrl)
+                        router.push('/' + redirectUrl + (actionType ? `?action_type=${actionType}` : ''))
                     } else {
                         notification.error({
                             message: 'Error',
