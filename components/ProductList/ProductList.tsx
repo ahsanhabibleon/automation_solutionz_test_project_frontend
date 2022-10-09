@@ -101,12 +101,12 @@ const ProductList = () => {
         }
     }, [pageQuery])
 
-    const handleProductActionCallback = async () => {
+    const handleProductActionCallback = async ({ type }: { type: string }) => {
         await fetchData().then(() => {
             setOpenActionModal({ open: false })
         }).finally(() => {
             notification.success({
-                message: "Booking completed successfully!"
+                message: type === 'book' ? "Booking completed successfully!" : "Returned product successfully!"
             })
         })
     }

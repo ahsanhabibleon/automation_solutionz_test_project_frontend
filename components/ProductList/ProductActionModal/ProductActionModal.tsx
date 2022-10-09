@@ -17,7 +17,7 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
         products: ProductDataTypes[],
         openActionModal: ModalStateTypes,
         closeActionModal: () => void,
-        handleProductActionCallback: () => void
+        handleProductActionCallback: ({ type }: { type: string }) => void
     }
 ) => {
 
@@ -149,7 +149,7 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
             try {
                 await axios.post(`/api/products/update/${payload?.id}`, payload?.data)
                     .then(() => {
-                        handleProductActionCallback()
+                        handleProductActionCallback({ type: modalType as string })
                         resetForm()
                     })
                     .catch((error) => {
