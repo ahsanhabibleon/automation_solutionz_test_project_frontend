@@ -1,5 +1,6 @@
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Form, Input, notification } from 'antd';
+import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { setCookieValue } from '../../utils/UserManager';
@@ -14,34 +15,19 @@ const SignInComp = ({ redirectUrl, actionType }: { redirectUrl: string, actionTy
 
     const sendPostRequest = async (payload: any) => {
         try {
-            await fetch('/api/users/signin', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data?.token) {
-                        setCookieValue('token', data?.token || '')
-                        notification.success({
-                            message: 'Successfully signed in!',
-                        })
-                        router.push('/' + redirectUrl + (actionType ? `?action_type=${actionType}` : ''))
-                    } else {
-                        notification.error({
-                            message: 'Error',
-                            description: data?.message || "Something went wrong"
-                        })
-                    }
+            const { data } = await axios.post('/api/users/signin', payload)
+            if (data?.token) {
+                setCookieValue('token', data?.token || '')
+                notification.success({
+                    message: 'Successfully signed in!',
                 })
-                .catch((error) => {
-                    notification.error({
-                        message: error?.message || 'Something went wrong!',
-                    })
+                router.push('/' + redirectUrl + (actionType ? `?action_type=${actionType}` : ''))
+            } else {
+                notification.error({
+                    message: 'Error',
+                    description: data?.message || "Something went wrong"
                 })
+            }
 
         } catch (error: any) {
             notification.error({

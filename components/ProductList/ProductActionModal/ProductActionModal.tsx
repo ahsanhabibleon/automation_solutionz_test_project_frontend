@@ -1,10 +1,15 @@
 import { Button, DatePicker, Form, InputNumber, Modal, notification, Select } from 'antd'
 import { RangePickerProps } from 'antd/lib/date-picker';
+import axios from 'axios';
 import moment from 'moment';
+import jwt_decode from "jwt-decode";
 import React, { useRef, useState } from 'react'
+import { useRouter } from 'next/router';
+import { getToken } from '../../../utils/UserManager';
 import { ModalStateTypes, ProductDataTypes } from '../ProductList.types'
-const { Option } = Select;
 import Styles from './ProductActionModal.module.scss'
+import { UserType } from '../../../types/global.types';
+const { Option } = Select;
 
 
 const ProductActionModal = ({ products, openActionModal, closeActionModal, handleProductActionCallback }:
@@ -31,6 +36,7 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
     const [paymentAmount, setPaymentAmount] = useState<number | null>(null)
 
     const { open, type: modalType } = openActionModal;
+    const router = useRouter()
 
     /* 
      case-1 (Book): list of products that has available status
@@ -46,6 +52,11 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
         const PRODUCT = listOfProducts?.find(prod => prod._id === values.product)
 
         if (!confirmationStage) {
+            const token = getToken();
+            let user: UserType | null = null;
+            if (token) {
+                user = jwt_decode(token)
+            }
             const payload: ProductDataTypes = {};
             if (modalType === 'book') {
                 const startDate = moment(values?.booking_starts); //todays date
@@ -68,9 +79,11 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
                     setPaymentAmount(booking_price_with_discount)
                     payload.availability = false
                     payload.bookedOn = moment(new Date()).format('YYYY/MM/DD')
+
                     payload.bookedBy = {
-                        name: 'Ahsan',
-                        userId: ''
+                        name: user?.name || '',
+                        userId: user?._id || '',
+                        email: user?.email || ''
                     }
                     payload.bookingPeriod = {
                         start: moment(startDate).format('YYYY/MM/DD'),
@@ -113,8 +126,9 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
                 payload.availability = should_repair ? false : true
                 payload.bookedOn = ''
                 payload.bookedBy = {
-                    name: '',
-                    userId: ''
+                    name: user?.name || '',
+                    userId: user?._id || '',
+                    email: user?.email || ''
                 }
                 payload.bookingPeriod = {}
 
@@ -133,14 +147,7 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
     const sendPostRequest = async () => {
         if (payload?.id && payload?.data) {
             try {
-                await fetch(`/api/products/update/${payload?.id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload?.data)
-                })
+                await axios.post(`/api/products/update/${payload?.id}`, payload?.data)
                     .then(() => {
                         handleProductActionCallback()
                         resetForm()
@@ -151,6 +158,7 @@ const ProductActionModal = ({ products, openActionModal, closeActionModal, handl
                         })
                     })
                     .finally(() => {
+                        router.push('/')
                         setTimeout(() => {
                             setConfirmationStage(false)
                         }, 2000);

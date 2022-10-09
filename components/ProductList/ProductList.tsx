@@ -1,14 +1,17 @@
-import { Button, Input, notification, Space } from 'antd'
+import { Button, Input, notification, Select, Space } from 'antd'
 import React, { useEffect, useReducer, useState } from 'react'
 import { getError } from '../../utils'
 import DataTable from '../DataTable'
 import ProductActionModal from './ProductActionModal'
-import { tableSettings } from './data'
+import { priceList, tableSettings } from './data'
 import Styles from './ProductList.module.scss'
-import { ModalStateTypes, ProductDataTypes, ProductFetchingAction, ProductFetchingActionKind, ProductReducerProps } from './ProductList.types'
+import { ModalStateTypes, PageQueryTypes, ProductDataTypes, ProductFetchingAction, ProductFetchingActionKind, ProductReducerProps } from './ProductList.types'
 import { useRouter } from 'next/router'
 import { getToken } from '../../utils/UserManager'
+import axios from 'axios'
+import { TablePaginationTypes } from '../DataTable/DataTable.types'
 const { Search } = Input;
+const { Option } = Select;
 
 const reducer = (state: ProductReducerProps, action: ProductFetchingAction) => {
     switch (action.type) {
@@ -45,27 +48,46 @@ const ProductList = () => {
     })
 
     const [openActionModal, setOpenActionModal] = useState<ModalStateTypes>({ open: false })
+    const [pageQuery, setPageQuery] = useState<PageQueryTypes>({
+        page: 1,
+        pageSize: 10,
+        query: '',
+        category: '',
+        price: ''
+    })
+    const [productCount, setProductCount] = useState<number | null>(null)
 
     const fetchData = async () => {
         dispatch({ type: ProductFetchingActionKind.FETCH_PRODUCTS })
+
         try {
-            await fetch("/api/products")
-                .then(res => res.json())
-                .then(json => {
-                    const manipulatedJSON = json.map((j: ProductDataTypes, i: number) => {
-                        return {
-                            serial: i + 1, ...j, durability: `${j?.durability}/${j?.max_durability}`
-                        }
-                    })
-                    dispatch({ type: ProductFetchingActionKind.FETCH_PRODUCTS_SUCCESS, payload: manipulatedJSON })
-                })
+            const { data } = await axios.get(`/api/products?page=${pageQuery.page}&pageSize=${pageQuery.pageSize}&query=${pageQuery.query}&category=${pageQuery.category}&price=${pageQuery.price}`)
+            const manipulatedJSON = data?.products.map((j: ProductDataTypes, i: number) => {
+                return {
+                    serial: i + 1, ...j, durability: `${j?.durability}/${j?.max_durability}`
+                }
+            })
+            setProductCount(data?.countProducts)
+            dispatch({ type: ProductFetchingActionKind.FETCH_PRODUCTS_SUCCESS, payload: manipulatedJSON })
         } catch (error: any) {
             dispatch({ type: ProductFetchingActionKind.FETCH_PRODUCTS_ERROR, payload: getError(error) || "Something went wrong" })
         }
     }
 
-    const onSearch = (value: string) => {
-        console.log({ value })
+    const onSearch = ({ value, type }: { value: string, type: string }) => {
+        const vars = { ...pageQuery }
+        if (type === 'query') {
+            vars.query = value || ''
+        } else if (type === 'price') {
+            vars.price = value || ''
+        } else {
+            vars.category = value || ''
+        }
+        setPageQuery((prev) => {
+            return {
+                ...prev, ...vars
+            }
+        })
     };
 
     useEffect(() => {
@@ -77,7 +99,7 @@ const ProductList = () => {
                 type: actionType as string
             })
         }
-    }, [])
+    }, [pageQuery])
 
     const handleProductActionCallback = async () => {
         await fetchData().then(() => {
@@ -101,29 +123,51 @@ const ProductList = () => {
         }
     }
 
+    const pagination: TablePaginationTypes = {
+        current: pageQuery?.page as number,
+        pageSize: pageQuery?.pageSize as number,
+        onChange: (page: number, pageSize: number) => {
+            setPageQuery({ ...pageQuery, page, pageSize })
+        },
+        total: productCount as number,
+    }
+
     return (
         <>
             <section className={Styles.products}>
                 <div className="container">
                     <header className={'d-flex justify-content-between align-items-center ' + Styles.section_header}>
-                        <h3 className='section-title'>Product List</h3>
+                        <h3 className='section-title d-flex align-items-center' style={{ gap: 16 }}>
+                            Product List
+                            <Select allowClear placeholder="Search by Category" style={{ minWidth: 150, fontWeight: 'normal' }} onChange={(value) => onSearch({ value, type: 'category' })}>
+                                <Option value='plain'>Plain</Option>
+                                <Option value='meter'>Meter</Option>
+                            </Select>
+                            <Select allowClear placeholder="Search by Price Range" style={{ minWidth: 150, fontWeight: 'normal' }} onChange={(value) => onSearch({ value, type: 'price' })}>
+                                {priceList.map(price => (
+                                    <Option value={price?.value}>{price?.label}</Option>
+                                ))}
+                            </Select>
+                            <Search placeholder="Search by Keyword" allowClear onSearch={(value) => onSearch({ value, type: 'query' })} style={{ width: 200 }} />
+
+                        </h3>
                         <Space direction="horizontal">
-                            <Button onClick={() => handleOpenActionModal({ open: true, type: 'book' })}>
+                            <Button type='primary' onClick={() => handleOpenActionModal({ open: true, type: 'book' })}>
                                 Book
                             </Button>
                             <Button onClick={() => handleOpenActionModal({ open: true, type: 'return' })}>
                                 Return
                             </Button>
-                            <Search placeholder="Search products..." allowClear onSearch={onSearch} style={{ width: 200 }} />
                         </Space>
                     </header>
                     <div className={Styles.product_list}>
-                        <DataTable settings={tableSettings} data={products} loading={loading} />
+                        <DataTable settings={tableSettings} data={products} loading={loading} pagination={pagination} />
                     </div>
                 </div>
             </section>
 
-            {openActionModal?.open &&
+            {
+                openActionModal?.open &&
                 <ProductActionModal
                     products={products}
                     openActionModal={openActionModal}

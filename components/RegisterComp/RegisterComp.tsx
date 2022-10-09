@@ -5,6 +5,8 @@ import {
     Input,
     notification,
 } from 'antd';
+import axios from 'axios';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { getToken, setCookieValue } from '../../utils/UserManager';
@@ -38,35 +40,19 @@ const Register = ({ redirectUrl, actionType }: { redirectUrl: string, actionType
 
     const sendPostRequest = async (payload: any) => {
         try {
-            await fetch('/api/users/signup', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data?.token) {
-                        setCookieValue('token', data?.token || '')
-                        notification.success({
-                            message: 'Successfully registered!',
-                        })
-                        router.push('/' + redirectUrl + (actionType ? `?action_type=${actionType}` : ''))
-                    } else {
-                        notification.error({
-                            message: 'Error',
-                            description: data?.message || "Something went wrong"
-                        })
-                    }
+            const { data } = await axios.post('/api/users/signup', payload)
+            if (data?.token) {
+                setCookieValue('token', data?.token || '')
+                notification.success({
+                    message: 'Successfully registered!',
                 })
-                .catch((error) => {
-                    notification.error({
-                        message: error?.message || 'Something went wrong!',
-                    })
+                router.push('/' + redirectUrl + (actionType ? `?action_type=${actionType}` : ''))
+            } else {
+                notification.error({
+                    message: 'Error',
+                    description: data?.message || "Something went wrong"
                 })
-
+            }
         } catch (error: any) {
             notification.error({
                 message: error?.message || 'Something went wrong!',
@@ -182,6 +168,13 @@ const Register = ({ redirectUrl, actionType }: { redirectUrl: string, actionType
                 <Button type="primary" htmlType="submit">
                     Register
                 </Button>
+                <br />
+                <br />
+                Already have an account? <Link href={'/sign-in' + (actionType ? `?action_type=${actionType}` : '')}>
+                    <a>
+                        Sign In
+                    </a>
+                </Link>
             </Form.Item>
         </Form>
     );

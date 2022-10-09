@@ -55,6 +55,7 @@ const DataTable = ({
                 scroll={{ x: scrollX || 1500 }}
                 className={topAligned ? className + ' top-aligned-column' : className}
                 rowKey={(record) => record?.id}
+                pagination={false}
             >
                 {colSettings &&
                     colSettings.map((col, idx) => (
@@ -108,15 +109,17 @@ const DataTable = ({
                 }
             </Table>
             {settings.isServersidePagination && (
-                <Pagination
-                    className="text-right"
-                    size="small"
-                    onChange={(page: number, size: number) => pagination?.onChange(page, size)}
-                    current={pagination?.current || 1}
-                    style={{ marginTop: 10 }}
-                    total={pagination?.total || 0}
-                    showTotal={(total) => `Total ${total} items`}
-                />
+                <div className='d-flex justify-content-end' style={{ marginTop: 10 }}>
+                    <Pagination
+                        className="text-right"
+                        size="small"
+                        onChange={(page: number, size: number) => pagination?.onChange(page, size)}
+                        current={pagination?.current || 1}
+                        style={{ marginTop: 10 }}
+                        total={pagination?.total || 0}
+                        showTotal={(total) => `Total ${total} items`}
+                    />
+                </div>
             )}
         </Card>
     )

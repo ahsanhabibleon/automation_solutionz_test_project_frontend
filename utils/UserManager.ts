@@ -1,6 +1,5 @@
 import { setCookie, destroyCookie, parseCookies } from 'nookies'
 
-
 //cookie functions
 export function setCookieValue(cName: string, cValue: string, expDays = 30) {
   const maxAge = expDays ? expDays * 24 * 60 * 60 * 1000 : null

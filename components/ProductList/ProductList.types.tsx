@@ -18,6 +18,7 @@ export interface ProductDataTypes {
     bookedBy?: {
         name: string
         userId: string
+        email: string
     }
     bookedOn?: string
 }
@@ -49,4 +50,12 @@ export interface ProductFetchingAction {
 export interface ModalStateTypes {
     open: boolean,
     type?: string | null
+}
+
+export interface PageQueryTypes {
+    page?: number
+    pageSize?: number
+    query?: string
+    category?: string
+    price?: any
 }
